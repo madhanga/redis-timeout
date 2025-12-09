@@ -12,14 +12,17 @@ import (
 func main() {
 	// Create Redis client
 	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Addr:         "amx-arom-redis0.gpx.uat.angelone.in:6379", //order redis uat9
+		Password:     "aromamx$123",                              // no password set
+		DB:           0,                                          // use default DB
+		PoolTimeout:  4000 * time.Millisecond,
+		ReadTimeout:  5000 * time.Millisecond,
+		WriteTimeout: 5000 * time.Millisecond,
 	})
 	defer client.Close()
 
 	// Create context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
 	// Ping to test connection
@@ -30,12 +33,13 @@ func main() {
 	fmt.Printf("Connected to Redis: %s\n", pong)
 
 	// Continuously read key in a loop
-	keyName := "mykey"
+	keyName := "myKey"
 	for {
 		// Create a new context for each request with timeout
-		reqCtx, reqCancel := context.WithTimeout(context.Background(), 2*time.Second)
+		reqCtx, reqCancel := context.WithTimeout(context.Background(), 3*time.Second)
 
 		val, err := client.Get(reqCtx, keyName).Result()
+
 		timestamp := time.Now().Format("15:04:05")
 
 		if err == redis.Nil {
@@ -47,6 +51,6 @@ func main() {
 		}
 
 		reqCancel()
-		time.Sleep(1 * time.Second)
+		time.Sleep(1 * time.Millisecond)
 	}
 }
